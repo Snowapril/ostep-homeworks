@@ -1,3 +1,8 @@
+/*
+@file problem2.c
+@detail measure time delay when "context switching" is occurred.
+*/
+
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <sys/wait.h>
@@ -7,7 +12,6 @@
 #include <string.h>
 #include <sched.h>
 
-// Check time delay when "context switching" is occurred.
 #define PERR_EXIT(msg) do { perror(msg), exit(EXIT_FAILURE);\
                             } while(0);
 
@@ -21,10 +25,7 @@ int main(int argc, char* argv[])
         fprintf(stderr, "Usage: problem2.out [count]\n");
         return -1;
     }
-    
     int count = atoi(argv[1]);
-    struct timeval start, end;
-    struct timezone tz;
     
     cpu_set_t set;
     CPU_ZERO(&set);
@@ -53,6 +54,9 @@ int main(int argc, char* argv[])
         if (sched_setaffinity(getpid(), sizeof(cpu_set_t), &set) == -1)
             PERR_EXIT("sched_setaffinity");
         
+        struct timeval start, end;
+        struct timezone tz;
+    
         gettimeofday(&start, &tz);
         for (int i = 0; i < count; ++i)
         {
@@ -61,7 +65,7 @@ int main(int argc, char* argv[])
         }
         gettimeofday(&end, &tz);
         
-        printf("Context switch %f microsecond\n", (float)(end.tv_sec * 1000000 + end.tv_usec - start.tv_sec * 1000000 - start.tv_usec) / (float)count);
+        printf("Context switch take %f microsecond\n", (float)(end.tv_sec * 1000000 + end.tv_usec - start.tv_sec * 1000000 - start.tv_usec) / (float)count);
         wait(NULL);
         break;
     }
